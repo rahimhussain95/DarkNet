@@ -1,0 +1,32 @@
+# Ignore Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore virtual environments
+venv/
+env/
+
+# Ignore logs and temporary files
+*.log
+*.db
+*.sqlite3
+*.tmp
+*.pid
+
+# Ignore sensitive files
+.env
+
+# Ignore development/editor-specific files
+.vscode/
+.idea/
+*.swp
+
+# Ignore build output
+build/
+dist/
+
+# Ignore Git metadata
+.git/
+.gitignore
