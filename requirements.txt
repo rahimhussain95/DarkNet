@@ -1,4 +1,6 @@
 flask
+flask-SocketIO
 requests
 python-dotenv
 gunicorn
+eventlet

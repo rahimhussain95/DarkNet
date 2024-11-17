@@ -15,9 +15,6 @@ env/
 *.tmp
 *.pid
 
-# Ignore sensitive files
-.env
-
 # Ignore development/editor-specific files
 .vscode/
 .idea/

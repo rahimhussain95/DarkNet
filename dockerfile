@@ -2,6 +2,7 @@ FROM python:3.9-slim
 
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
+ENV FLASK_RUN_PORT=5002
 ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
@@ -12,6 +13,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 5002
 
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "-w", "4", "-k", "eventlet", "-b", "0.0.0.0:5002", "app:app"]
