@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Darknet</title>
+    <link rel="stylesheet" href="/static/styles.css"> 
+    <script src="https://d3js.org/d3.v7.min.js" defer></script> 
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@v0.172.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.172.0/examples/jsm/"
+          }
+        }
+      </script>
+</head>
+<body>
+    <h1>Space Debris Visualization</h1>
+    <div id="visualization"></div>
+    <div id="tooltip" style="display: none; position: absolute; background: #fff; border: 1px solid #ccc; padding: 5px; font-size: 12px;"></div>
+    <script src="/static/scripts.js" defer></script> 
+</body>
+</html>

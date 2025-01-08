@@ -1,6 +1,7 @@
 import requests
 from dotenv import load_dotenv
 import os
+import time
 
 load_dotenv()
 
@@ -10,51 +11,63 @@ PASSWORD = os.getenv('SPACE_TRACK_PASS')
 base_url = "https://www.space-track.org"
 
 def login():
-    session = requests.Session()
-    dataUrl = "https://www.space-track.org/ajaxauth/login"
+    url = f"{base_url}/ajaxauth/login"
     payload = {
-        'identity': USERNAME,
-        'password': PASSWORD
+        "identity": USERNAME,
+        "password": PASSWORD
     }
-
-    response = session.post(dataUrl, data=payload)
-
+    session = requests.Session()
+    response = session.post(url, data=payload)
+    
     if response.status_code == 200:
-        print("Login Successful")
+        print("Logged in.")
         return session
     else:
-        print("ERROR: Failure to Login")
-        return
-
-def get_leo(session):
-    if not session:
-        print("ERROR: Session not Active")
+        print(f"Login Error: {response.status_code}, Response: {response.text}")
         return 
-    
-    endpoint = "https://www.space-track.org/basicspacedata/query/class/tle_latest"
 
-    # High-risk LEO object parameters
-    params = (
-        "?ORDINAL=1"
-        "&PERIOD=>=88"
-        "&PERIOD=<=127"
-        "&APOGEE=>=160"
-        "&APOGEE=<=2000"
-        "&PERIGEE=>=160"
-        "&PERIGEE=<=2000"
-        "&DECAYED=false"
-        "&FORMAT=json"
-    )
-    full_url = f"{endpoint}{params}"
+def get_data(session, url):
+    try:
+        response = session.get(url)
+        if response.status_code == 200:
+            return response.json()
+        elif response.status_code == 429:  # API Throttling
+            print("API OVERLOAD")
+            time.sleep(60)
+            return get_data(session, url)
+        else:
+            print(f"Failed to retrieve data: {response.status_code}, Response: {response.text}")
+            return 
+    except requests.exceptions.RequestException as e:
+        print(f"Request failed: {e}")
+        return 
 
-    response = session.get(full_url)
+def aggregate_data():
+    session = login()
+    if not session:
+        return 
 
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"ERROR: Failed to retrieve Data. Status Code: {response.status_code}")
-        print(f"Response Text: {response.text}")
-        print("ERROR: Failure to retrive Data")
-        return
+    url = "https://www.space-track.org/basicspacedata/query/class/tle_latest/ORDINAL/1/APOGEE/160--2000/PERIGEE/160--2000/DECAYED/false/PERIOD/87--128/orderby/EPOCH%20desc/limit/100/emptyresult/show"
     
-    
+    raw_data = get_data(session, url)
+
+    if not raw_data:
+        return 
+
+    processed_data = []
+    for obj in raw_data:
+        try:
+            processed_data.append({
+                "name": obj.get("OBJECT_NAME", "Unknown"),
+                "type": obj.get("OBJECT_TYPE", "Unknown"),
+                "apogee": float(obj.get("APOGEE", 0)),
+                "perigee": float(obj.get("PERIGEE", 0)),
+                "mean_motion": float(obj.get("MEAN_MOTION", 0)),
+                "risk_level": "high" if float(obj.get("BSTAR", 0)) > 0.01 else "low",
+                "eccentricity": float(obj.get("ECCENTRICITY", 0)),
+            })
+
+        except KeyError as e:
+            print(f"Missing key {e} in object: {obj}")
+
+    return processed_data
