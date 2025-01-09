@@ -1,0 +1,26 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: black; /* Black space background */
+    color: white; /* Text color */
+    text-align: center;
+}
+
+#visualization {
+    width: 100vw;
+    height: 100vh;
+    margin: 0 auto;
+    position: relative;
+}
+
+#tooltip {
+    position: absolute;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border-radius: 5px;
+    pointer-events: none;
+    font-size: 0.9em;
+    z-index: 1000;
+}

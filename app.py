@@ -13,7 +13,7 @@ def data_display():
     if not session:
         return jsonify({"ERROR": "Login Failure"}), 501
     
-    data = api.aggregate_data(session)
+    data = api.aggregate_data()
     if not data:
         return jsonify({"Error": "Failed to retrieve data"}), 500
     return jsonify(data), 200
