@@ -2,6 +2,7 @@ import requests
 import json
 from dotenv import load_dotenv
 from skyfield.api import EarthSatellite, load
+from math import isnan
 import os
 import time
 
@@ -72,16 +73,21 @@ def aggregate_data(raw_data):
             satellite = EarthSatellite(obj['TLE_LINE1'], obj['TLE_LINE2'], obj['OBJECT_NAME'])
             geocentric = satellite.at(now)
             subpoint = geocentric.subpoint()
+            
+            if any(is_nan(obj.get(key)) for key in ["altitude", "latitude", "longitude"]):
+                continue
 
-        processed_data.append({
-            "name": obj.get("OBJECT_NAME", "Unknown"),
-            "NORAD_CAT_ID": obj["NORAD_CAT_ID"],
-            "latitude": subpoint.latitude.degrees,
-            "longitude": subpoint.longitude.degrees,
-            "altitude": subpoint.elevation.km,
-            "mean_motion": float(obj.get("MEAN_MOTION", 0)),
-            "inclination": float(obj.get("INCLINATION", 0))
-        })
+            processed_data.append({
+                "name": obj.get("OBJECT_NAME", "Unknown"),
+                "NORAD_CAT_ID": obj["NORAD_CAT_ID"],
+                "latitude": subpoint.latitude.degrees,
+                "longitude": subpoint.longitude.degrees,
+                "altitude": subpoint.elevation.km,
+                "mean_motion": float(obj.get("MEAN_MOTION", 0)),
+                "inclination": float(obj.get("INCLINATION", 0))
+            }) 
     
     return processed_data
 
+def is_nan(value):
+    return value is None or (isinstance(value, float) and isnan(value))
