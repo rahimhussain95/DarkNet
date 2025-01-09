@@ -1,5 +1,6 @@
 import requests
 from dotenv import load_dotenv
+import pandas as pd
 import os
 import time
 
@@ -47,7 +48,7 @@ def aggregate_data():
     if not session:
         return 
 
-    url = "https://www.space-track.org/basicspacedata/query/class/tle_latest/ORDINAL/1/APOGEE/160--2000/PERIGEE/160--2000/DECAYED/false/PERIOD/87--128/orderby/EPOCH%20desc/limit/100/emptyresult/show"
+    url = "https://www.space-track.org/basicspacedata/query/class/tle_latest/APOGEE/%3C2000/DECAYED/NULL/PERIGEE//%3E160/PERIOD/88--127/OBJECT_TYPE/debris/BSTAR/%3E1e-4/orderby/BSTAR%20desc/limit/200/format/csv/emptyresult/show"
     
     raw_data = get_data(session, url)
 
