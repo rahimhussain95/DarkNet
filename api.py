@@ -67,14 +67,18 @@ def aggregate_data(raw_data):
     processed_data = []
 
     for obj in raw_data:
-        if obj['NORAD_CAT_ID'] not in IDitto:
-            IDitto.add(obj['NORAD_CAT_ID'])
+        if obj['NORAD_CAT_ID'] in IDitto:
+            continue
+        IDitto.add(obj['NORAD_CAT_ID'])
 
+        try:
             satellite = EarthSatellite(obj['TLE_LINE1'], obj['TLE_LINE2'], obj['OBJECT_NAME'])
             geocentric = satellite.at(now)
             subpoint = geocentric.subpoint()
-            
-            if any(is_nan(obj.get(key)) for key in ["altitude", "latitude", "longitude"]):
+
+            # Validate calculated fields
+            if any(is_nan(value) for value in [subpoint.latitude.degrees, subpoint.longitude.degrees, subpoint.elevation.km]):
+                print(f"Skipping invalid satellite data: {obj['NORAD_CAT_ID']}")
                 continue
 
             processed_data.append({
@@ -85,8 +89,11 @@ def aggregate_data(raw_data):
                 "altitude": subpoint.elevation.km,
                 "mean_motion": float(obj.get("MEAN_MOTION", 0)),
                 "inclination": float(obj.get("INCLINATION", 0))
-            }) 
-    
+            })
+        except Exception as e:
+            print(f"Error processing NORAD_CAT_ID {obj['NORAD_CAT_ID']}: {e}")
+            continue
+
     return processed_data
 
 def is_nan(value):
