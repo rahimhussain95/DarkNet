@@ -1,6 +1,7 @@
 import requests
 from dotenv import load_dotenv
 import pandas as pd
+from io import StringIO
 import os
 import time
 
@@ -31,7 +32,8 @@ def get_data(session, url):
     try:
         response = session.get(url)
         if response.status_code == 200:
-            return response.json()
+            csv_data = StringIO(response.text)
+            df = pd.read_csv(csv_data)
         elif response.status_code == 429:  # API Throttling
             print("API OVERLOAD")
             time.sleep(60)
@@ -50,22 +52,23 @@ def aggregate_data():
 
     url = "https://www.space-track.org/basicspacedata/query/class/tle_latest/APOGEE/%3C2000/DECAYED/NULL/PERIGEE//%3E160/PERIOD/88--127/OBJECT_TYPE/debris/BSTAR/%3E1e-4/orderby/BSTAR%20desc/limit/200/format/csv/emptyresult/show"
     
-    raw_data = get_data(session, url)
-
-    if not raw_data:
+    df = get_data(session, url) 
+    if df is None:   
         return 
 
-    processed_data = []
-    for obj in raw_data:
-        try:
-            processed_data.append({
-                "name": obj.get("OBJECT_NAME", "Unknown"),
-                "type": obj.get("OBJECT_TYPE", "Unknown"),
-                "apogee": float(obj.get("APOGEE", 0)),
-                "perigee": float(obj.get("PERIGEE", 0)),
+    processed_data = df.apply(lambda row: {
+        "name": row.get("OBJECT_NAME", "Unknown"),
+        "type": obj.get("OBJECT_TYPE", "Unknown"),
+        "apogee": float(obj.get("APOGEE", 0)),
+         "perigee": float(obj.get("PERIGEE", 0)),
                 "mean_motion": float(obj.get("MEAN_MOTION", 0)),
                 "risk_level": "high" if float(obj.get("BSTAR", 0)) > 0.01 else "low",
                 "eccentricity": float(obj.get("ECCENTRICITY", 0)),
+    })
+    for obj in raw_data:
+        try:
+            processed_data.append({
+                
             })
 
         except KeyError as e:
