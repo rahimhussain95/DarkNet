@@ -1,7 +1,7 @@
 import requests
+import json
 from dotenv import load_dotenv
-import pandas as pd
-from io import StringIO
+from skyfield.api import EarthSatellite, load
 import os
 import time
 
@@ -32,8 +32,8 @@ def get_data(session, url):
     try:
         response = session.get(url)
         if response.status_code == 200:
-            csv_data = StringIO(response.text)
-            df = pd.read_csv(csv_data)
+            tle_latest_data = response.json()
+            return tle_latest_data
         elif response.status_code == 429:  # API Throttling
             print("API OVERLOAD")
             time.sleep(60)
@@ -45,33 +45,43 @@ def get_data(session, url):
         print(f"Request failed: {e}")
         return 
 
-def aggregate_data():
+def fetch_data():
     session = login()
     if not session:
         return 
 
-    url = "https://www.space-track.org/basicspacedata/query/class/tle_latest/APOGEE/%3C2000/DECAYED/NULL/PERIGEE//%3E160/PERIOD/88--127/OBJECT_TYPE/debris/BSTAR/%3E1e-4/orderby/BSTAR%20desc/limit/200/format/csv/emptyresult/show"
+    url = "https://www.space-track.org/basicspacedata/query/class/tle_latest/APOGEE/%3C2000/DECAYED/NULL/PERIGEE//%3E160/PERIOD/88--127/OBJECT_TYPE/debris/BSTAR/%3E1e-4/orderby/BSTAR%20desc/limit/100/emptyresult/show"
     
-    df = get_data(session, url) 
-    if df is None:   
+    debris_data = get_data(session, url) 
+    if debris_data is None:   
         return 
+    
+    return debris_data
 
-    processed_data = df.apply(lambda row: {
-        "name": row.get("OBJECT_NAME", "Unknown"),
-        "type": obj.get("OBJECT_TYPE", "Unknown"),
-        "apogee": float(obj.get("APOGEE", 0)),
-         "perigee": float(obj.get("PERIGEE", 0)),
-                "mean_motion": float(obj.get("MEAN_MOTION", 0)),
-                "risk_level": "high" if float(obj.get("BSTAR", 0)) > 0.01 else "low",
-                "eccentricity": float(obj.get("ECCENTRICITY", 0)),
-    })
+def aggregate_data(raw_data):
+    ts = load.timescale()
+    now = ts.now()
+
+    IDitto = set()
+    processed_data = []
+
     for obj in raw_data:
-        try:
-            processed_data.append({
-                
-            })
+        if obj['NORAD_CAT_ID'] not in IDitto:
+            IDitto.add(obj['NORAD_CAT_ID'])
 
-        except KeyError as e:
-            print(f"Missing key {e} in object: {obj}")
+            satellite = EarthSatellite(obj['TLE_LINE1'], obj['TLE_LINE2'], obj['OBJECT_NAME'])
+            geocentric = satellite.at(now)
+            subpoint = geocentric.subpoint()
 
+        processed_data.append({
+            "name": obj.get("OBJECT_NAME", "Unknown"),
+            "NORAD_CAT_ID": obj["NORAD_CAT_ID"],
+            "latitude": subpoint.latitude.degrees,
+            "longitude": subpoint.longitude.degrees,
+            "altitude": subpoint.elevation.km,
+            "mean_motion": float(obj.get("MEAN_MOTION", 0)),
+            "inclination": float(obj.get("INCLINATION", 0))
+        })
+    
     return processed_data
+

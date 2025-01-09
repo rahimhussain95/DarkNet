@@ -13,9 +13,14 @@ def data_display():
     if not session:
         return jsonify({"ERROR": "Login Failure"}), 501
     
-    data = api.aggregate_data()
+    debris_data = api.fetch_data()
+    if not debris_data:
+        return jsonify({"ERROR": "Failed to retrieve data"}), 502
+    
+    data = api.aggregate_data(debris_data)
     if not data:
-        return jsonify({"Error": "Failed to retrieve data"}), 500
+        return jsonify({"Error": "Failed to retrieve data"}), 200
+    
     return jsonify(data), 200
 
 if __name__ == "__main__":
