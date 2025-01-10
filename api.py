@@ -14,7 +14,7 @@ PASSWORD = os.getenv('SPACE_TRACK_PASS')
 base_url = "https://www.space-track.org"
 
 #Query
-QUERY_URL = os.getenv('TEST_QUERY_URL')
+QUERY_URL = os.getenv('GP_QUERY_URL')
 
 def login():
     url = f"{base_url}/ajaxauth/login"
@@ -65,15 +65,6 @@ def fetch_data():
 def is_nan(value):
     return value is None or (isinstance(value, float) and isnan(value))
 
-def filter_data(raw_data):
-    unique_data = []
-    IDitto = set()
-    for obj in raw_data:
-         if obj['NORAD_CAT_ID'] not in IDitto:
-             IDitto.add(obj['NORAD_CAT_ID'])
-             unique_data.append(obj)
-    return unique_data
-
 def get_geo_data(current_LEO, timescale, current_time):
     try:
         satellite = EarthSatellite(current_LEO['TLE_LINE1'], current_LEO['TLE_LINE2'], current_LEO['OBJECT_NAME'])
@@ -88,14 +79,39 @@ def get_geo_data(current_LEO, timescale, current_time):
         print(f"Error processing ID: {current_LEO['NORAD_CAT_ID']}: {e}")
         return None
 
-def process_data(filtered_data):
+def risk_assessment(obj):
+    bstar = float(obj.get("BSTAR", 0))
+    periapsis = float(obj.get("PERIAPSIS", 0))
+    mean_motion = float(obj.get("MEAN_MOTION", 0))
+    size = obj.get("RCS_SIZE", "Small")
+    crowded_zone = 600 <= periapsis <= 800
+
+    bstar_risk = 3 if bstar > 1e-3 else (2 if bstar > 1e-4 else 1)
+    periapsis_risk = 3 if periapsis < 200 else (2 if periapsis <= 300 else 1)
+    mean_motion_risk = 3 if mean_motion > 15.5 else (2 if mean_motion >= 15 else 1)
+    size_risk = 2 if size == "Medium" else 1
+    crowded_zone_risk = 2 if crowded_zone else 0
+
+    risk_score = (
+        3 * bstar_risk +
+        2 * periapsis_risk +
+        2 * mean_motion_risk +
+        1 * size_risk +
+        2 * crowded_zone_risk
+    )
+
+    return "High Risk" if risk_score >= 15 else ("Medium Risk" if risk_score >= 10 else "Low Risk")
+
+def aggregate_data(raw_data):
     ts = load.timescale()
     now = ts.now()
     processed_data = []
 
-    for obj in filtered_data:
+    for obj in raw_data:
         geocentric_data = get_geo_data(obj, ts, now)
         if geocentric_data and not any(is_nan(value) for value in geocentric_data.values()):
+            risk_level = risk_assessment(obj)
+
             processed_data.append({
                 "name": obj.get("OBJECT_NAME", "Unknown"),
                 "NORAD_CAT_ID": obj["NORAD_CAT_ID"],
@@ -103,13 +119,11 @@ def process_data(filtered_data):
                 "longitude": geocentric_data["longitude"],
                 "altitude": geocentric_data["altitude"],
                 "mean_motion": float(obj.get("MEAN_MOTION", 0)),
-                "inclination": float(obj.get("INCLINATION", 0))
+                "inclination": float(obj.get("INCLINATION", 0)),
+                "Priority": risk_level
             })
     
     return processed_data
 
-def aggregate_data(raw_data):
-    filtered_data = filter_data(raw_data)
-    processed_data = process_data(filtered_data)
-    return processed_data
+
 
