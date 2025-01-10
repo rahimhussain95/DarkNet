@@ -13,6 +13,9 @@ USERNAME = os.getenv('SPACE_TRACK_USER')
 PASSWORD = os.getenv('SPACE_TRACK_PASS')
 base_url = "https://www.space-track.org"
 
+#Query
+QUERY_URL = os.getenv('TEST_QUERY_URL')
+
 def login():
     url = f"{base_url}/ajaxauth/login"
     payload = {
@@ -51,7 +54,7 @@ def fetch_data():
     if not session:
         return 
 
-    url = "https://www.space-track.org/basicspacedata/query/class/tle_latest/APOGEE/%3C2000/DECAYED/NULL/PERIGEE//%3E160/PERIOD/88--127/OBJECT_TYPE/debris/BSTAR/%3E1e-4/orderby/BSTAR%20desc/limit/100/emptyresult/show"
+    url = QUERY_URL
     
     debris_data = get_data(session, url) 
     if debris_data is None:   
@@ -59,42 +62,54 @@ def fetch_data():
     
     return debris_data
 
-def aggregate_data(raw_data):
+def is_nan(value):
+    return value is None or (isinstance(value, float) and isnan(value))
+
+def filter_data(raw_data):
+    unique_data = []
+    IDitto = set()
+    for obj in raw_data:
+         if obj['NORAD_CAT_ID'] not in IDitto:
+             IDitto.add(obj['NORAD_CAT_ID'])
+             unique_data.append(obj)
+    return unique_data
+
+def get_geo_data(current_LEO, timescale, current_time):
+    try:
+        satellite = EarthSatellite(current_LEO['TLE_LINE1'], current_LEO['TLE_LINE2'], current_LEO['OBJECT_NAME'])
+        geocentric = satellite.at(current_time)
+        subpoint = geocentric.subpoint()
+        return {
+            "latitude": subpoint.latitude.degrees,
+            "longitude": subpoint.longitude.degrees,
+            "altitude": subpoint.elevation.km
+        }
+    except Exception as e:
+        print(f"Error processing ID: {current_LEO['NORAD_CAT_ID']}: {e}")
+        return None
+
+def process_data(filtered_data):
     ts = load.timescale()
     now = ts.now()
-
-    IDitto = set()
     processed_data = []
 
-    for obj in raw_data:
-        if obj['NORAD_CAT_ID'] in IDitto:
-            continue
-        IDitto.add(obj['NORAD_CAT_ID'])
-
-        try:
-            satellite = EarthSatellite(obj['TLE_LINE1'], obj['TLE_LINE2'], obj['OBJECT_NAME'])
-            geocentric = satellite.at(now)
-            subpoint = geocentric.subpoint()
-
-            # Validate calculated fields
-            if any(is_nan(value) for value in [subpoint.latitude.degrees, subpoint.longitude.degrees, subpoint.elevation.km]):
-                print(f"Skipping invalid satellite data: {obj['NORAD_CAT_ID']}")
-                continue
-
+    for obj in filtered_data:
+        geocentric_data = get_geo_data(obj, ts, now)
+        if geocentric_data and not any(is_nan(value) for value in geocentric_data.values()):
             processed_data.append({
                 "name": obj.get("OBJECT_NAME", "Unknown"),
                 "NORAD_CAT_ID": obj["NORAD_CAT_ID"],
-                "latitude": subpoint.latitude.degrees,
-                "longitude": subpoint.longitude.degrees,
-                "altitude": subpoint.elevation.km,
+                "latitude": geocentric_data["latitude"],
+                "longitude": geocentric_data["longitude"],
+                "altitude": geocentric_data["altitude"],
                 "mean_motion": float(obj.get("MEAN_MOTION", 0)),
                 "inclination": float(obj.get("INCLINATION", 0))
             })
-        except Exception as e:
-            print(f"Error processing NORAD_CAT_ID {obj['NORAD_CAT_ID']}: {e}")
-            continue
-
+    
     return processed_data
 
-def is_nan(value):
-    return value is None or (isinstance(value, float) and isnan(value))
+def aggregate_data(raw_data):
+    filtered_data = filter_data(raw_data)
+    processed_data = process_data(filtered_data)
+    return processed_data
+
