@@ -16,11 +16,12 @@ body {
 
 #tooltip {
     position: absolute;
-    padding: 10px;
+    padding: 5px;
     background-color: rgba(0, 0, 0, 0.8);
-    color: #fff;
+    color: #050101;
     border-radius: 5px;
     pointer-events: none;
+    display: none;
     font-size: 0.9em;
     z-index: 1000;
 }

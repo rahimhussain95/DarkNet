@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { addSatellites } from "./satellite.js";
 
 const w = window.innerWidth;
 const h = window.innerHeight;
@@ -42,6 +43,8 @@ earthGroup.add(earthMesh);
 const sunLight = new THREE.DirectionalLight(0xffffff, 3.0);
 sunLight.position.set(-2, 0.5, 1.5);
 scene.add(sunLight);
+
+addSatellites(scene, camera, renderer);
 
 function animate() {
   requestAnimationFrame(animate);
