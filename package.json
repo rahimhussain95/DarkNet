@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "satellite.js": "^5.0.0"
+  }
+}

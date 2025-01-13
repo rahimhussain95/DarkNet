@@ -1,0 +1,34 @@
+from apscheduler.schedulers.background import BackgroundScheduler
+from redis_utils import update_cache
+import api
+import time
+
+def refresh_satellite_data():
+    print("Refreshing Space-Track TLE Data...")
+    debris_data = api.fetch_data()
+    if not debris_data:
+        print("Error: Failed to retrieve data")
+        return False
+
+    aggregated_data = api.test_data(debris_data)
+    if not aggregated_data:
+        print("Error: Failed to process data")
+        return False
+
+    update_cache(aggregated_data)
+    print("Cache updated successfully!")
+    return True
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(refresh_satellite_data, 'interval', hours=1) 
+scheduler.start()
+
+print("Scheduler Initiated.")
+# Prevent script from exiting immediately
+try:
+    while True:
+        pass
+except (KeyboardInterrupt, SystemExit):
+    print("Shutting down Scheduler...")
+    scheduler.shutdown()
+    print("Exited Scheduler. ")

@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { addSatellites } from "./satellite.js";
+import { addSatellites } from "./debris.js";
 
 const w = window.innerWidth;
 const h = window.innerHeight;
@@ -18,13 +18,14 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
 
 const earthGroup = new THREE.Group();
-earthGroup.rotation.z = -23.4 * Math.PI / 180;
+earthGroup.rotation.z = 0; 
 scene.add(earthGroup);
 
 new OrbitControls(camera, renderer.domElement);
 
 const detail = 12;
 const loader = new THREE.TextureLoader();
+
 // const texture = loader.load("/static/images/earthlights4k.jpg");
 
 // // Apply texture filtering for sharper details
@@ -33,12 +34,15 @@ const loader = new THREE.TextureLoader();
 // texture.magFilter = THREE.LinearFilter; 
 const geometry = new THREE.SphereGeometry(1, 64, 64); // 64 segments for smoothness
 const material = new THREE.MeshPhongMaterial({
-  map: loader.load("/static/images/earthmap2k.jpg"),
+  map: loader.load("/static/images/earthmap4k.jpg"),
   shininess: 10,
 });
 
 const earthMesh = new THREE.Mesh(geometry, material);
 earthGroup.add(earthMesh);
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
+scene.add(ambientLight);
 
 const sunLight = new THREE.DirectionalLight(0xffffff, 3.0);
 sunLight.position.set(-2, 0.5, 1.5);

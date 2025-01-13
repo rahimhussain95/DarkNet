@@ -18,10 +18,11 @@ body {
     position: absolute;
     padding: 5px;
     background-color: rgba(0, 0, 0, 0.8);
-    color: #050101;
+    color: #100303; 
     border-radius: 5px;
-    pointer-events: none;
     display: none;
+    pointer-events: none;
     font-size: 0.9em;
     z-index: 1000;
 }
+

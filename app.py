@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, redirect, render_template
 import api
+from redis_utils import get_cached_data, check_cache
+from scheduler import refresh_satellite_data
 
 app = Flask(__name__)
 
@@ -9,10 +11,6 @@ def index():
 
 @app.route('/data', methods=['GET']) 
 def data_display():
-    session = api.login()
-    if not session:
-        return jsonify({"ERROR": "Login Failure"}), 501
-    
     debris_data = api.fetch_data()
     if not debris_data:
         return jsonify({"ERROR": "Failed to retrieve data"}), 502
@@ -22,6 +20,24 @@ def data_display():
         return jsonify({"Error": "Failed to retrieve data"}), 503
     
     return jsonify(data), 200
+
+@app.route('/test', methods=['GET'])
+def render_satellite():
+    cached_data = get_cached_data()
+    if cached_data:
+        return jsonify(cached_data), 200
+
+    if check_cache():
+        success = refresh_satellite_data()
+        if not success:
+            return jsonify({"ERROR": "Failed to retrieve or update satellite data"}), 502
+
+    updated_data = get_cached_data()
+    if not updated_data:
+        return jsonify({"ERROR": "Failed to retrieve data after refresh"}), 503
+
+    return jsonify(updated_data), 200
+    
 
 if __name__ == "__main__":
     app.run(debug=True, port=5002)

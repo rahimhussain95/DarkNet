@@ -122,8 +122,18 @@ def aggregate_data(raw_data):
                 "inclination": float(obj.get("INCLINATION", 0)),
                 "Priority": risk_level
             })
-    
+
     return processed_data
+
+def test_data(raw_data):
+    tle_data = []
+    for obj in raw_data:
+        tle_data.append({
+            "tle0": obj.get("TLE_LINE0", "Unknown"),
+            "tle1": obj.get("TLE_LINE1", "Unknown"),
+            "tle2": obj.get("TLE_LINE2", "Unknown")
+        })
+    return tle_data
 
 
 
