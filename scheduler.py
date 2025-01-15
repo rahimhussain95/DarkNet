@@ -3,6 +3,9 @@ from redis_utils import update_cache
 import api
 import time
 
+# API fetch scheduler to avoid API throttling, Query limits, and Reduce overhead. 
+
+# Refresh Cache'd API data at hourly intervals
 def refresh_satellite_data():
     print("Refreshing Space-Track TLE Data...")
     debris_data = api.fetch_data()

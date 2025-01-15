@@ -15,13 +15,13 @@ def data_display():
     if not debris_data:
         return jsonify({"ERROR": "Failed to retrieve data"}), 502
     
-    data = api.aggregate_data(debris_data)
+    data = api.test_data(debris_data)
     if not data:
         return jsonify({"Error": "Failed to retrieve data"}), 503
     
     return jsonify(data), 200
 
-@app.route('/test', methods=['GET'])
+@app.route('/scheduled', methods=['GET'])
 def render_satellite():
     cached_data = get_cached_data()
     if cached_data:
@@ -37,7 +37,21 @@ def render_satellite():
         return jsonify({"ERROR": "Failed to retrieve data after refresh"}), 503
 
     return jsonify(updated_data), 200
+
+@app.route('/test', methods=['GET'])
+def tester():
+    data = api.fetch_data();
+    if not data:
+        return jsonify({"Couldn't get data buddy"}), 505
     
+    trueData = api.test_data(data)
+    
+    return jsonify(trueData), 200
+
+# @app.route('/about', methods=['GET'])
+# @app.route('/cleanup)
+# @app.route('/satellite', methods=['GET'])
+   
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5002)
+    app.run(debug=True)

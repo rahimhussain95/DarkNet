@@ -4,3 +4,5 @@ requests
 python-dotenv
 gunicorn
 eventlet
+redis
+apscheduler
