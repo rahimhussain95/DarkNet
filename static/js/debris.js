@@ -168,15 +168,20 @@ function onDocumentMouseMove(event, satellites, camera, renderer) {
 
 
 function showTooltip(content, x, y) {
-    tooltip.innerHTML = content;
-    tooltip.style.left = `${x}px`;
+    const tooltip = document.getElementById('tooltip'); // Outer container
+    const tooltipContent = document.getElementById('tooltip-content'); // .text element
+
+    tooltipContent.innerHTML = content; // Set the dynamic content
+    tooltip.style.left = `${x}px`; // Position tooltip
     tooltip.style.top = `${y}px`;
-    tooltip.style.display = 'block';
+    tooltip.style.display = 'block'; // Show tooltip
 }
 
 function hideTooltip() {
-    tooltip.style.display = 'none';
+    const tooltip = document.getElementById('tooltip');
+    tooltip.style.display = 'none'; // Hide tooltip
 }
+
 
 function animateSatellites(satellites, simulatedTime, camera, renderer) {
     const timeStep = 100; 

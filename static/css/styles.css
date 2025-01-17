@@ -14,15 +14,98 @@ body {
     position: relative;
 }
 
-#tooltip {
-    position: absolute;
-    padding: 5px;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: #100303; 
-    border-radius: 5px;
-    display: none;
-    pointer-events: none;
-    font-size: 0.9em;
+/* Tooltip Container */
+.outer {
+    border-radius: 10px;
+    background: #0c0d0d; /* Simplify background */
+    overflow: visible; /* Ensure children are not clipped */
     z-index: 1000;
+    border: 1px solid #ffffff; /* Add border for visibility */
 }
 
+/* Moving Dot */
+.dot {
+    width: 10px;
+    height: 10px;
+    position: absolute;
+    background-color: #fff; /* White dot */
+    box-shadow: 0 0 10px #ffffff; /* Glow effect */
+    border-radius: 50%; /* Circular shape */
+    top: 10%; /* Place at 10% from the top */
+    right: 10%; /* Place at 10% from the right */
+    animation: moveDot 3s linear infinite; /* Simple animation */
+}
+
+/* Dot Animation */
+@keyframes moveDot {
+    0%, 100% {
+        top: 10%;
+        right: 10%;
+    }
+    25% {
+        top: 10%;
+        right: 80%;
+    }
+    50% {
+        top: 80%;
+        right: 80%;
+    }
+    75% {
+        top: 80%;
+        right: 10%;
+    }
+}
+
+/* Tooltip Card */
+.card {
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+    background: #444444; /* Simple solid color for debugging */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+}
+
+/* Tooltip Text */
+.card .text {
+    font-size: 8px;
+    text-align: center;
+}
+
+/* Decorative Lines */
+.line {
+    position: absolute;
+    background-color: #ffffff; /* White lines for visibility */
+}
+
+.topl, .bottoml {
+    width: 100%;
+    height: 2px;
+}
+
+.leftl, .rightl {
+    height: 100%;
+    width: 2px;
+}
+
+.topl {
+    top: 0;
+    left: 0;
+}
+
+.bottoml {
+    bottom: 0;
+    left: 0;
+}
+
+.leftl {
+    top: 0;
+    left: 0;
+}
+
+.rightl {
+    top: 0;
+    right: 0;
+}

@@ -41,10 +41,29 @@ const material = new THREE.MeshPhongMaterial({
 const earthMesh = new THREE.Mesh(geometry, material);
 earthGroup.add(earthMesh);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 1.0);
-scene.add(ambientLight);
+const lightsMat = new THREE.MeshBasicMaterial({
+  map: loader.load("/static/images/earthlights4k.jpg"),
+  blending: THREE.AdditiveBlending,
+});
+const lightsMesh = new THREE.Mesh(geometry, lightsMat);
+earthGroup.add(lightsMesh);
 
-const sunLight = new THREE.DirectionalLight(0xffffff, 3.0);
+const cloudsMat = new THREE.MeshStandardMaterial({
+  map: loader.load("/static/images/earthcloudmap.jpg"),
+  transparent: true,
+  opacity: 0.8,
+  blending: THREE.AdditiveBlending,
+  alphaMap: loader.load("/static/images/earthcloudmaptrans.jpg"),
+  // alphaTest: 0.3,
+});
+const cloudsMesh = new THREE.Mesh(geometry, cloudsMat);
+cloudsMesh.scale.setScalar(1.003);
+earthGroup.add(cloudsMesh);
+
+// const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
+// scene.add(ambientLight);
+
+const sunLight = new THREE.DirectionalLight(0xffffff, 2.0);
 sunLight.position.set(-2, 0.5, 1.5);
 scene.add(sunLight);
 
@@ -59,6 +78,31 @@ function animate() {
   // stars.rotation.y -= 0.0002;
   renderer.render(scene, camera);
 }
+
+function createStarField() {
+  const starGeometry = new THREE.BufferGeometry();
+  const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1.2, sizeAttenuation: true });
+
+  const starVertices = [];
+  const minDistance = 175;
+  for (let i = 0; i < 10000; i++) {
+    let x, y, z;
+    do {
+      x = THREE.MathUtils.randFloatSpread(2000);
+      y = THREE.MathUtils.randFloatSpread(2000);
+      z = THREE.MathUtils.randFloatSpread(2000);
+    } while (Math.sqrt(x * x + y * y + z * z) < minDistance);
+
+    starVertices.push(x, y, z);
+  }
+
+  starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+
+  const stars = new THREE.Points(starGeometry, starMaterial);
+  scene.add(stars);
+}
+
+createStarField();
 
 animate();
 

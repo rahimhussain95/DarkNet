@@ -9,6 +9,10 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/sphere', methods=['GET'])
+def sphereTest():
+    return render_template('sphere.html')
+
 @app.route('/data', methods=['GET']) 
 def data_display():
     debris_data = api.fetch_data()

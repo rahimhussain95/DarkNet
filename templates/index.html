@@ -19,6 +19,15 @@
 <body>
     <h1>Space Debris Visualization</h1>
     <div id="visualization"></div>
-    <div id="tooltip" style="position: absolute; background: #fff; border: 1px solid #ccc; padding: 5px; font-size: 12px;"></div> 
+    <div id="tooltip" class="outer" style="display: none; position: absolute;">
+        <div class="dot"></div>
+        <div class="card">
+            <div class="text" id="tooltip-content">Hover Text</div>
+            <div class="line topl"></div>
+            <div class="line bottoml"></div>
+            <div class="line leftl"></div>
+            <div class="line rightl"></div>
+        </div>
+    </div>      
 </body>
 </html>
