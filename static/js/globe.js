@@ -50,15 +50,51 @@ earthGroup.add(lightsMesh);
 
 const cloudsMat = new THREE.MeshStandardMaterial({
   map: loader.load("/static/images/earthcloudmap.jpg"),
-  transparent: true,
-  opacity: 0.8,
+  // transparent: true,
+  // opacity: 0.8,
   blending: THREE.AdditiveBlending,
-  alphaMap: loader.load("/static/images/earthcloudmaptrans.jpg"),
-  // alphaTest: 0.3,
+  // alphaMap: loader.load("/static/images/earthcloudmaptrans.jpg"),
+  // // alphaTest: 0.3,
 });
 const cloudsMesh = new THREE.Mesh(geometry, cloudsMat);
 cloudsMesh.scale.setScalar(1.003);
 earthGroup.add(cloudsMesh);
+
+const glowGeometry = new THREE.SphereGeometry(1, 64, 64); // Slightly larger sphere
+const glowMaterial = new THREE.ShaderMaterial({
+  uniforms: {
+    'c': { type: 'f', value: 0.5 },
+    'p': { type: 'f', value: 4.0 },
+    glowColor: { type: 'c', value: new THREE.Color(0x00b3ff) },
+    viewVector: { type: 'v3', value: camera.position }
+  },
+  vertexShader: `
+    uniform vec3 viewVector;
+    uniform float c;
+    uniform float p;
+    varying float intensity;
+    void main() {
+      vec3 vNormal = normalize(normalMatrix * normal);
+      vec3 vNormel = normalize(normalMatrix * viewVector);
+      intensity = pow(c - dot(vNormal, vNormel), p);
+      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 glowColor;
+    varying float intensity;
+    void main() {
+      vec3 glow = glowColor * intensity * 2.0;
+      gl_FragColor = vec4(glow, 1.0);
+    }
+  `,
+  side: THREE.BackSide,
+  blending: THREE.AdditiveBlending,
+  transparent: true
+});
+const glowMesh = new THREE.Mesh(glowGeometry, glowMaterial);
+glowMesh.scale.setScalar(1.1);
+earthGroup.add(glowMesh);
 
 // const ambientLight = new THREE.AmbientLight(0xffffff, 0.1);
 // scene.add(ambientLight);
