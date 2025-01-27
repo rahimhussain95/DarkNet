@@ -1,7 +1,9 @@
 import * as THREE from "three";
 
 const tooltip = document.getElementById('tooltip');
-let mousePosition = { x: 0, y: 0 };
+const tooltipContent = document.getElementById('tooltip-content');
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
 
 export function addSatellites(scene, camera, renderer) {
     fetch('/test')
@@ -32,7 +34,7 @@ export function addSatellites(scene, camera, renderer) {
             const position = convertLatLonToXYZ(latitude, longitude, altitude);
 
             const geometry = new THREE.SphereGeometry(0.01, 8, 8);
-            const material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+            const material = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffff00, emissiveIntensity: 0.5 });
             const satelliteMesh = new THREE.Mesh(geometry, material);
 
             satelliteMesh.position.set(position.x, position.y, position.z);
@@ -51,9 +53,9 @@ export function addSatellites(scene, camera, renderer) {
         });
 
         document.addEventListener('mousemove', (event) => {
-            mousePosition.x = event.clientX; 
-            mousePosition.y = event.clientY; 
-            onDocumentMouseMove(mousePosition, satellites, camera, renderer);
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1; 
+            onDocumentMouseMove(mouse, satellites, camera, renderer);
         });
 
         const pinLat = 35.66408;
@@ -138,32 +140,28 @@ function convertLatLonToXYZ(lat, lon, alt) {
     return { x, y, z };
 }
 
-function onDocumentMouseMove(event, satellites, camera, renderer) {
-    const mouse = new THREE.Vector2();
-    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-    const raycaster = new THREE.Raycaster();
+function onDocumentMouseMove(mouse, satellites, camera, renderer, scene) {
     raycaster.setFromCamera(mouse, camera);
-
     const intersects = raycaster.intersectObjects(satellites);
 
     if (intersects.length > 0) {
-        const intersected = intersects[0].object;
-        const { name, NORAD_CAT_ID, initialLatitude, initialLongitude } = intersected.userData;
-        const tooltipX = (mouse.x + 1) / 2 * window.innerWidth;
-        const tooltipY = -(mouse.y - 1) / 2 * window.innerHeight;
-        showTooltip(
-            `Name: ${name}<br>
-             NORAD CAT ID: ${NORAD_CAT_ID}<br>
-             Initial Latitude: ${initialLatitude.toFixed(2)}<br>
-             Initial Longitude: ${initialLongitude.toFixed(2)}`,
-            tooltipX,
-            tooltipY
-        );
+        const intersectedObject = intersects[0].object;
+        const { name, NORAD_CAT_ID, initialLatitude, initialLongitude } = intersectedObject.userData;
+
+        tooltip.style.display = 'block';
+        tooltip.style.left = `${(mouse.x * window.innerWidth / 2) + (window.innerWidth / 2)}px`;
+        tooltip.style.top = `${(-mouse.y * window.innerHeight / 2) + (window.innerHeight / 2)}px`;
+        tooltipContent.innerHTML = `
+            <strong>${name}</strong><br>
+            NORAD ID: ${NORAD_CAT_ID}<br>
+            Latitude: ${initialLatitude.toFixed(2)}<br>
+            Longitude: ${initialLongitude.toFixed(2)}
+        `;
     } else {
-        hideTooltip();
+        tooltip.style.display = 'none';
     }
+
+    renderer.render(scene, camera);
 }
 
 

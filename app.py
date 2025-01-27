@@ -11,7 +11,7 @@ def index():
 
 @app.route('/sphere', methods=['GET'])
 def sphereTest():
-    return render_template('sphere.html')
+    return render_template('world.html')
 
 @app.route('/data', methods=['GET']) 
 def data_display():
