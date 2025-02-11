@@ -2,52 +2,69 @@ body {
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
-    background-color: black; /* Black space background */
-    color: white; /* Text color */
+    background-color: black; 
+    color: white; 
     text-align: center;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 3%;
+  width: 100%;
+  position: absolute;
+  flex: 1;
 }
 
 #visualization {
     width: 100vw;
     height: 100vh;
     margin: 0 auto;
-    position: relative;
+    position: absolute;
+    z-index: 0;
+}
+
+#topper {
+  display: flex;
+  z-index: 10;
+  position: absolute;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 #tooltip {
     position: absolute;
-    background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.8); 
     color: white;
     padding: 10px;
     border-radius: 5px;
-    pointer-events: none; /* Ensure it doesn't block mouse events */
-    display: none; /* Hidden by default */
+    pointer-events: none; 
+    display: none; 
     z-index: 1000;
-    border: 1px solid #ffffff; /* Add border for visibility */
-}
-/* Tooltip Container */
-.outer {
-    border-radius: 10px;
-    background: #0c0d0d; /* Simplify background */
-    overflow: visible; /* Ensure children are not clipped */
-    z-index: 1000;
-    border: 1px solid #ffffff; /* Add border for visibility */
+    border: 1px solid #ffffff; 
 }
 
-/* Moving Dot */
+.outer {
+    border-radius: 10px;
+    background: #0c0d0d;
+    overflow: visible; 
+    z-index: 1000;
+    border: 1px solid #ffffff;
+}
+
+
 .dot {
     width: 10px;
     height: 10px;
     position: absolute;
-    background-color: #fff; /* White dot */
-    box-shadow: 0 0 10px #ffffff; /* Glow effect */
-    border-radius: 50%; /* Circular shape */
-    top: 10%; /* Place at 10% from the top */
-    right: 10%; /* Place at 10% from the right */
-    animation: moveDot 3s linear infinite; /* Simple animation */
+    background-color: #fff; 
+    box-shadow: 0 0 10px #ffffff; 
+    border-radius: 50%; 
+    top: 10%; 
+    right: 10%; 
+    animation: moveDot 3s linear infinite; 
 }
 
-/* Dot Animation */
+
 @keyframes moveDot {
     0%, 100% {
         top: 10%;
@@ -67,28 +84,25 @@ body {
     }
 }
 
-/* Tooltip Card */
 .card {
     width: 100%;
     height: 100%;
     border-radius: 5px;
-    background: #444444; /* Simple solid color for debugging */
+    background: #444444; 
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
 }
 
-/* Tooltip Text */
 .card .text {
-    font-size: 8px;
+    font-size: 12px;
     text-align: center;
 }
 
-/* Decorative Lines */
 .line {
     position: absolute;
-    background-color: #ffffff; /* White lines for visibility */
+    background-color: #ffffff; 
 }
 
 .topl, .bottoml {
@@ -121,12 +135,11 @@ body {
     right: 0;
 }
 
-/* From Uiverse.io by Smit-Prajapati */ 
+ 
 .radio-container {
   --main-color: #f7e479;
   --main-color-opacity: #f7e4791c;
 
-  /* change this according inputs count */
   --total-radio: 3;
 
   display: flex;
@@ -214,27 +227,39 @@ body {
   transform: translateY(300%);
 }
 
-.radio-container input:nth-of-type(5):checked ~ .glider-container .glider {
-  transform: translateY(400%);
+
+
+.btn-github {
+  cursor: pointer;
+  display: flex;
+  margin-left: auto;
+  margin-right: 3%;
+  align-self: center;
+  gap: 0.5rem;
+  border: none;
+
+  transition: all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1);
+  border-radius: 100px;
+  font-weight: 800;
+  place-content: center;
+
+  padding: 0.75rem 1rem;
+  font-size: 0.825rem;
+  line-height: 1rem;
+
+  background-color: rgba(0, 0, 0, 0.4);
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.04),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  color: #fff;
 }
 
-.radio-container input:nth-of-type(6):checked ~ .glider-container .glider {
-  transform: translateY(500%);
-}
-
-.radio-container input:nth-of-type(7):checked ~ .glider-container .glider {
-  transform: translateY(600%);
-}
-
-.radio-container input:nth-of-type(8):checked ~ .glider-container .glider {
-  transform: translateY(700%);
-}
-
-.radio-container input:nth-of-type(9):checked ~ .glider-container .glider {
-  transform: translateY(800%);
-}
-
-.radio-container input:nth-of-type(10):checked ~ .glider-container .glider {
-  transform: translateY(900%);
+.btn-github:hover {
+  box-shadow:
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 0 0 1px rgba(252, 232, 3, 0.08);
+  color: #fce803;
+  transform: translate(0, -0.25rem);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 

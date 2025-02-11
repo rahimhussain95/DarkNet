@@ -8,6 +8,7 @@ CACHE_KEY = 'satellite_data'
 CACHE_TIMESTAMP_KEY = 'satellite_data_timestamp'
 CACHE_EXPIRATION = 3600  
 
+# Cache satellite data and update as needed if outdated
 def get_cached_data():
     cached_data = redis_client.get(CACHE_KEY)
     cached_timestamp = redis_client.get(CACHE_TIMESTAMP_KEY)

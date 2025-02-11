@@ -9,10 +9,6 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
-@app.route('/sphere', methods=['GET'])
-def sphereTest():
-    return render_template('world.html')
-
 @app.route('/data', methods=['GET']) 
 def data_display():
     debris_data = api.fetch_data()
@@ -42,15 +38,10 @@ def render_satellite():
 
     return jsonify(updated_data), 200
 
-@app.route('/test', methods=['GET'])
-def tester():
-    data = api.fetch_data();
-    if not data:
-        return jsonify({"Couldn't get data buddy"}), 505
-    
-    trueData = api.test_data(data)
-    
-    return jsonify(trueData), 200
+@app.route('/sphere', methods=['GET'])
+def sphereTest():
+    return render_template('world.html')
+
 
 # @app.route('/about', methods=['GET'])
 # @app.route('/cleanup)

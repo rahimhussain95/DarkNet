@@ -23,7 +23,7 @@ def refresh_satellite_data():
     return True
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(refresh_satellite_data, 'interval', minutes=1) 
+scheduler.add_job(refresh_satellite_data, 'interval', hours=1) 
 scheduler.start()
 
 print("Scheduler Initiated.")

@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "satellite.js": "^5.0.0"
+    "satellite.js": "^5.0.0",
+    "three": "^0.173.0"
   }
 }
